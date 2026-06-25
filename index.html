@@ -169,6 +169,32 @@ td.n input{text-align:right}
     <div class="br"><button class="btn bo" style="font-size:12px" onclick="document.getElementById('pvSec').style.display='none'">關閉預覽</button></div>
   </div>
 
+  <!-- ④ 已實現功能 -->
+  <div class="card">
+    <div class="card-t" style="color:#059669">✅ 目前已實現功能</div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+      <div>✅ 手寫報價單圖片上傳（支援拖放，JPG/PNG/WEBP）</div>
+      <div>✅ Google Gemini AI 自動辨識手寫文字，結構化輸出品項、數量、單價</div>
+      <div>✅ 辨識結果可即時編輯、新增/刪除品項，自動重算小計、5%稅額、合計</div>
+      <div>✅ 套入公司原始 Excel 報價單模板，格式完全一致</div>
+      <div>✅ 同時支援下載 Excel (.xlsx) 與 PDF 兩種格式</div>
+      <div>✅ 報價單版面預覽，與實際輸出檔案一致</div>
+      <div>✅ API Key 安全保護（藏在後端伺服器，前端無法取得）</div>
+    </div>
+  </div>
+
+  <!-- ⑤ 未來可優化功能 -->
+  <div class="card">
+    <div class="card-t" style="color:#f59e0b">🔮 未來可優化功能（提案規劃中）</div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+      <div>🟠 LINE Bot 串接：老闆直接在 LINE 傳照片，Bot 自動回傳報價單 Excel，無需開啟網頁</div>
+      <div>🟠 AI 信心值標註：辨識不確定的欄位以紅字標示，支援多模型交叉比對提高準確率</div>
+      <div>🟠 品項字典自動修正：建立公司常用工程品項資料庫，辨識結果自動比對修正錯字</div>
+      <div>🟠 客戶對應表管理：建立「客戶名稱 ↔ LINE ID」對照表，報價單自動發送至指定客戶</div>
+      <div>🟠 報價歷史紀錄：儲存所有歷史報價單，支援查詢、搜尋與統計分析</div>
+    </div>
+  </div>
+
 </div>
 
 <script>
