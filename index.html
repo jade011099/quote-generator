@@ -295,9 +295,9 @@ function addRow(it) {
     <td><input value="${E(it.note||'')}" placeholder="備註"></td>
     <td><button class="db" title="刪除">✕</button></td>`;
   const ins = tr.querySelectorAll("input");
-  ins[3].oninput = ins[5].oninput = () => {
-    const a = (parseFloat(ins[3].value)||0) * (parseFloat(ins[5].value)||0);
-    ins[6].value = a ? Math.round(a) : "";
+  ins[2].oninput = ins[4].oninput = () => {
+    const a = (parseFloat(ins[2].value)||0) * (parseFloat(ins[4].value)||0);
+    ins[5].value = a ? Math.round(a) : "";
     calc();
   };
   tr.querySelector(".db").onclick = () => { tr.remove(); reIdx(); calc(); };
@@ -310,7 +310,7 @@ function calc() {
   let s = 0;
   document.querySelectorAll("#tb tr").forEach(r => {
     const ins = r.querySelectorAll("input");
-    s += (parseFloat(ins[3].value)||0) * (parseFloat(ins[5].value)||0);
+    s += (parseFloat(ins[2].value)||0) * (parseFloat(ins[4].value)||0);
   });
   const tax = Math.round(s * 0.05);
   document.getElementById("ts").textContent = F(s);
@@ -325,9 +325,9 @@ function collect() {
   const items = [];
   document.querySelectorAll("#tb tr").forEach(r => {
     const ins = r.querySelectorAll("input");
-    const q = parseFloat(ins[3].value)||0, p = parseFloat(ins[5].value)||0;
-    items.push({name:ins[0].value,spec:ins[1].value,qty:q,unit:ins[4].value,
-                price:p,amount:Math.round(q*p),note:ins[7].value});
+    const q = parseFloat(ins[2].value)||0, p = parseFloat(ins[4].value)||0;
+    items.push({name:ins[0].value,spec:ins[1].value,qty:q,unit:ins[3].value,
+                price:p,amount:Math.round(q*p),note:ins[6].value});
   });
   return {
     client:document.getElementById("fc").value,
