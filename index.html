@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 報價單生成器 — 登發室內裝璜工程有限公司</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--b:#1a5fa8;--bl:#dce8f8;--bd:#0d3d6e;--g:#f5f7fa;--br:#d0d7e2;--tx:#1e293b;--mt:#6b7280;--ok:#059669;--er:#dc2626;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;background:#eef2f7;color:var(--tx);min-height:100vh}
+
+/* header */
+header{background:linear-gradient(135deg,var(--b),var(--bd));color:#fff;padding:18px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+header h1{font-size:20px;font-weight:700;letter-spacing:1px}
+header .sub{font-size:12px;opacity:.8;margin-top:2px}
+.badge{background:rgba(255,255,255,.2);font-size:11px;padding:4px 10px;border-radius:20px;margin-left:auto;white-space:nowrap}
+
+/* layout */
+.wrap{max-width:920px;margin:0 auto;padding:20px 14px 60px}
+.card{background:#fff;border-radius:var(--r);border:1px solid var(--br);padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card-t{font-size:14px;font-weight:600;color:var(--b);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sn{background:var(--b);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+
+/* upload */
+.uz{border:2px dashed var(--br);border-radius:var(--r);padding:40px 20px;text-align:center;cursor:pointer;transition:.2s;background:var(--g)}
+.uz:hover,.uz.drag{border-color:var(--b);background:var(--bl)}
+.uz .ic{font-size:44px;margin-bottom:8px}
+.uz p{font-size:14px;color:var(--mt)}
+.uz small{font-size:12px;color:#9ca3af;margin-top:4px;display:block}
+#fi{display:none}
+.pb{margin-top:10px;position:relative;display:none}
+.pb img{max-height:220px;max-width:100%;border-radius:8px;border:1px solid var(--br);object-fit:contain;background:var(--g);display:block}
+.rx{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+
+/* btn */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:.15s;font-family:inherit}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.bp{background:var(--b);color:#fff;border-color:var(--b)}.bp:hover:not(:disabled){background:var(--bd)}
+.bo{background:#fff;color:var(--b);border-color:var(--b)}.bo:hover:not(:disabled){background:var(--bl)}
+.bg{background:var(--ok);color:#fff;border-color:var(--ok)}.bg:hover:not(:disabled){background:#047857}
+.br{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* status */
+.st{display:none;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:10px}
+.st.show{display:flex}.st.ld{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.st.er{background:#fef2f2;color:var(--er);border:1px solid #fecaca}
+.st.ok{background:#f0fdf4;color:var(--ok);border:1px solid #bbf7d0}
+.sp{width:16px;height:16px;border:2px solid #bfdbfe;border-top-color:var(--b);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* form */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ff{grid-column:1/-1}
+.fd label{font-size:11px;color:var(--mt);font-weight:600;display:block;margin-bottom:3px}
+.fd input,.fd textarea{width:100%;border:1px solid var(--br);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--tx);transition:.15s}
+.fd input:focus,.fd textarea:focus{outline:none;border-color:var(--b);box-shadow:0 0 0 2px var(--bl)}
+
+/* table */
+.tw{overflow-x:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:660px}
+th{background:var(--b);color:#fff;padding:7px 5px;text-align:center;font-weight:500;font-size:12px}
+td{padding:3px 4px;border-bottom:1px solid #e5e7eb;vertical-align:middle}
+tr:nth-child(even){background:#f9fafb}
+td input{width:100%;border:none;background:transparent;font-size:12px;padding:3px;font-family:inherit;color:var(--tx)}
+td input:focus{outline:1px solid var(--b);border-radius:3px}
+td.n input{text-align:right}
+.db{background:none;border:none;cursor:pointer;color:#d1d5db;font-size:15px;padding:2px;border-radius:3px}
+.db:hover{color:var(--er)}
+
+/* total */
+.tb{display:flex;justify-content:flex-end;gap:20px;background:var(--g);border:1px solid var(--br);border-radius:8px;padding:10px 16px;margin-top:8px;font-size:13px}
+.ti{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.ti .l{font-size:11px;color:var(--mt)}.ti .v{font-weight:600;font-family:'Courier New',monospace;font-size:14px}
+.ti.gd .v{color:var(--b);font-size:18px}
+
+/* preview */
+.pq{border:2px solid #333;background:#fff;padding:14px;font-size:12px;max-width:660px;margin:0 auto}
+.pq-t{text-align:center;font-size:20px;font-weight:bold;letter-spacing:8px;margin-bottom:3px}
+.pq-c{text-align:center;font-size:17px;margin-bottom:2px}
+.pq-a,.pq-p{text-align:center;font-size:12px;margin-bottom:2px}
+.pq-i{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-top:2px solid #333}
+.pq-tb{width:100%;border-collapse:collapse;margin-top:4px}
+.pq-tb th,.pq-tb td{border:1px solid #333;padding:3px 4px;text-align:center;font-size:11px}
+.pq-tb th{background:#f0f0f0;font-weight:600}
+.pq-tb td.l{text-align:left}.pq-tb td.r{text-align:right}
+.pq-s{display:flex;flex-direction:column;align-items:flex-end;margin-top:8px;font-size:12px;gap:2px}
+
+@media(max-width:600px){.fg{grid-template-columns:1fr}header h1{font-size:16px}.tb{gap:12px;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🏗️ AI 報價單生成器</h1>
+    <div class="sub">登發室內裝璜工程有限公司 — 手寫圖片 → 正式報價單</div>
+  </div>
+  <span class="badge" id="apiBadge">連線中...</span>
+</header>
+
+<div class="wrap">
+
+  <!-- ① 上傳 -->
+  <div class="card">
+    <div class="card-t"><span class="sn">1</span>上傳手寫報價單圖片</div>
+    <div class="uz" id="dz">
+      <div class="ic">📷</div>
+      <p>點擊上傳 或 拖放圖片到此處</p>
+      <small>支援 JPG / PNG / WEBP（建議光線充足、字跡清晰）</small>
+    </div>
+    <input type="file" id="fi" accept="image/*">
+    <div class="pb" id="pb"><img id="pi"><button class="rx" id="rx">✕</button></div>
+    <div class="st" id="s1"></div>
+    <div class="br">
+      <button class="btn bp" id="ocrBtn" disabled>✨ 開始 AI 辨識</button>
+      <button class="btn bo" id="demoBtn">📋 載入示範資料</button>
+    </div>
+  </div>
+
+  <!-- ② 編輯 -->
+  <div class="card" id="editSec" style="display:none">
+    <div class="card-t"><span class="sn">2</span>確認並編輯報價單內容</div>
+    <div class="fg">
+      <div class="fd"><label>此致（客戶名稱）</label><input id="fc" placeholder="客戶公司名稱"></div>
+      <div class="fd"><label>工地地點</label><input id="fs" placeholder="施工地點"></div>
+      <div class="fd"><label>客戶電話</label><input id="fp"></div>
+      <div class="fd"><label>客戶傳真</label><input id="ff"></div>
+      <div class="fd"><label>報價日期</label><input type="date" id="fd"></div>
+      <div class="fd"><label>報價人</label><input id="fv" value="陳　世　助"></div>
+      <div class="fd ff"><label>報價人電話</label><input id="fvp" value="0931661180"></div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:var(--b)">品項明細</span>
+        <button class="btn bo" style="padding:5px 10px;font-size:12px" id="addBtn">＋ 新增品項</button>
+      </div>
+      <div class="tw">
+        <table><thead><tr>
+          <th style="width:30px">#</th>
+          <th style="width:26%">品名</th>
+          <th style="width:13%">規格</th>
+          <th style="width:8%">數量</th>
+          <th style="width:7%">單位</th>
+          <th style="width:11%">單價</th>
+          <th style="width:11%">金額</th>
+          <th style="width:12%">備註</th>
+          <th style="width:28px"></th>
+        </tr></thead><tbody id="tb"></tbody></table>
+      </div>
+      <div class="tb">
+        <div class="ti"><span class="l">小計</span><span class="v" id="ts">0</span></div>
+        <div class="ti"><span class="l">5%營業稅</span><span class="v" id="tt">0</span></div>
+        <div class="ti gd"><span class="l">合計</span><span class="v" id="ta">0</span></div>
+      </div>
+    </div>
+    <div class="br">
+      <button class="btn bo" id="pvBtn">👁 預覽報價單</button>
+      <button class="btn bg" id="xlBtn">📥 下載 Excel</button>
+      <button class="btn bp" id="pdfBtn">📄 下載 PDF</button>
+    </div>
+    <div class="st" id="s2"></div>
+  </div>
+
+  <!-- ③ 預覽 -->
+  <div class="card" id="pvSec" style="display:none">
+    <div class="card-t"><span class="sn">3</span>報價單預覽（與輸出檔案版面一致）</div>
+    <div id="pvBox"></div>
+    <div class="br"><button class="btn bo" style="font-size:12px" onclick="document.getElementById('pvSec').style.display='none'">關閉預覽</button></div>
+  </div>
+
+</div>
+
+<script>
+// ╔═══════════════════════════════════════════════════════════════════╗
+// ║  👇👇👇  部署後把下面這行換成你的 Render 網址  👇👇👇          ║
+// ╚═══════════════════════════════════════════════════════════════════╝
+const API = location.hostname === "localhost" || location.hostname === "127.0.0.1"
+  ? "http://localhost:8080"
+  : "https://你的Render網址.onrender.com";  // ← 改這裡！
+
+let imgB64 = null, imgMime = "image/jpeg";
+
+// ── 初始化 ────────────────────────────────────────────────────────────
+document.getElementById("fd").value = new Date().toISOString().split("T")[0];
+checkApi();
+
+async function checkApi() {
+  const b = document.getElementById("apiBadge");
+  try {
+    const r = await fetch(API + "/", {signal: AbortSignal.timeout(8000)});
+    if (r.ok) { b.textContent = "✅ 伺服器正常"; b.style.background = "rgba(5,150,105,.3)"; }
+    else throw 0;
+  } catch { b.textContent = "⚠ 伺服器未連線"; b.style.background = "rgba(220,38,38,.3)"; }
+}
+
+// ── 上傳圖片 ──────────────────────────────────────────────────────────
+const dz = document.getElementById("dz"), fi = document.getElementById("fi");
+dz.onclick = () => fi.click();
+dz.ondragover = e => { e.preventDefault(); dz.classList.add("drag"); };
+dz.ondragleave = () => dz.classList.remove("drag");
+dz.ondrop = e => { e.preventDefault(); dz.classList.remove("drag"); const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith("image/")) load(f); };
+fi.onchange = e => { if(e.target.files[0]) load(e.target.files[0]); };
+
+document.getElementById("rx").onclick = () => {
+  imgB64 = null;
+  document.getElementById("pb").style.display = "none";
+  dz.style.display = "";
+  fi.value = "";
+  document.getElementById("ocrBtn").disabled = true;
+  ss("s1","","");
+};
+
+function load(file) {
+  imgMime = file.type || "image/jpeg";
+  const r = new FileReader();
+  r.onload = e => {
+    imgB64 = e.target.result.split(",")[1];
+    document.getElementById("pi").src = e.target.result;
+    document.getElementById("pb").style.display = "block";
+    dz.style.display = "none";
+    document.getElementById("ocrBtn").disabled = false;
+  };
+  r.readAsDataURL(file);
+}
+
+// ── OCR ───────────────────────────────────────────────────────────────
+document.getElementById("ocrBtn").onclick = async () => {
+  if (!imgB64) return;
+  document.getElementById("ocrBtn").disabled = true;
+  ss("s1", "ld", "🔍 正在呼叫 Gemini AI 辨識手寫內容，約需 10~20 秒...");
+  try {
+    const r = await fetch(API + "/ocr", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({image: imgB64, mime: imgMime})
+    });
+    const j = await r.json();
+    if (!r.ok || !j.ok) throw new Error(j.error || "辨識失敗");
+    ss("s1", "ok", `✅ 辨識完成！共 ${(j.data.items||[]).length} 個品項`);
+    fill(j.data);
+  } catch(e) {
+    ss("s1", "er", "❌ " + e.message);
+    document.getElementById("ocrBtn").disabled = false;
+  }
+};
+
+// ── 示範資料 ──────────────────────────────────────────────────────────
+document.getElementById("demoBtn").onclick = () => {
+  fill({
+    client:"台中市政府建設局", phone:"04-2228-9111", fax:"04-2228-9222",
+    date: new Date().toISOString().split("T")[0],
+    site:"台中市西屯區市政路工地",
+    items:[
+      {name:"輕隔間工程",spec:"60mm輕鋼架",qty:80,unit:"m²",price:850,amount:68000,note:""},
+      {name:"矽酸鈣板",spec:"6mm雙面",qty:80,unit:"m²",price:650,amount:52000,note:""},
+      {name:"油漆工程",spec:"乳膠漆兩底兩度",qty:160,unit:"m²",price:180,amount:28800,note:"含批土"},
+      {name:"木作天花板",spec:"平釘造型",qty:35,unit:"m²",price:2800,amount:98000,note:""},
+      {name:"地磚工程",spec:"60×60拋光",qty:50,unit:"m²",price:1200,amount:60000,note:"含材料"},
+    ]
+  });
+  ss("s1","ok","✅ 已載入示範資料，可直接編輯後下載");
+};
+
+// ── 填入表單 ──────────────────────────────────────────────────────────
+function fill(d) {
+  document.getElementById("fc").value = d.client||"";
+  document.getElementById("fp").value = d.phone||"";
+  document.getElementById("ff").value = d.fax||"";
+  document.getElementById("fs").value = d.site||"";
+  document.getElementById("fd").value = d.date||new Date().toISOString().split("T")[0];
+  if(d.vendor) document.getElementById("fv").value = d.vendor;
+  if(d.vendor_phone) document.getElementById("fvp").value = d.vendor_phone;
+  document.getElementById("tb").innerHTML = "";
+  (d.items&&d.items.length ? d.items : [{name:"",spec:"",qty:1,unit:"式",price:0,note:""}]).forEach(addRow);
+  calc();
+  const sec = document.getElementById("editSec");
+  sec.style.display = "block";
+  sec.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function addRow(it) {
+  it = it||{name:"",spec:"",qty:1,unit:"式",price:0,note:""};
+  const tbody = document.getElementById("tb");
+  const tr = document.createElement("tr");
+  const q = parseFloat(it.qty)||0, p = parseFloat(it.price)||0;
+  tr.innerHTML = `
+    <td style="text-align:center;color:var(--mt);font-size:11px">${tbody.rows.length+1}</td>
+    <td><input value="${E(it.name)}" placeholder="品名"></td>
+    <td><input value="${E(it.spec||'')}" placeholder="規格"></td>
+    <td class="n"><input type="number" value="${q||''}" min="0" step="any"></td>
+    <td><input value="${E(it.unit||'式')}" style="text-align:center"></td>
+    <td class="n"><input type="number" value="${p||''}" min="0" step="any"></td>
+    <td class="n"><input value="${q*p?Math.round(q*p):''}" readonly style="background:#f9fafb;color:var(--mt)"></td>
+    <td><input value="${E(it.note||'')}" placeholder="備註"></td>
+    <td><button class="db" title="刪除">✕</button></td>`;
+  const ins = tr.querySelectorAll("input");
+  ins[3].oninput = ins[5].oninput = () => {
+    const a = (parseFloat(ins[3].value)||0) * (parseFloat(ins[5].value)||0);
+    ins[6].value = a ? Math.round(a) : "";
+    calc();
+  };
+  tr.querySelector(".db").onclick = () => { tr.remove(); reIdx(); calc(); };
+  tbody.appendChild(tr);
+}
+function reIdx() {
+  document.querySelectorAll("#tb tr").forEach((r,i) => r.cells[0].textContent = i+1);
+}
+function calc() {
+  let s = 0;
+  document.querySelectorAll("#tb tr").forEach(r => {
+    const ins = r.querySelectorAll("input");
+    s += (parseFloat(ins[3].value)||0) * (parseFloat(ins[5].value)||0);
+  });
+  const tax = Math.round(s * 0.05);
+  document.getElementById("ts").textContent = F(s);
+  document.getElementById("tt").textContent = F(tax);
+  document.getElementById("ta").textContent = F(Math.round(s + tax));
+}
+
+document.getElementById("addBtn").onclick = () => { addRow(); calc(); };
+
+// ── 收集資料 ──────────────────────────────────────────────────────────
+function collect() {
+  const items = [];
+  document.querySelectorAll("#tb tr").forEach(r => {
+    const ins = r.querySelectorAll("input");
+    const q = parseFloat(ins[3].value)||0, p = parseFloat(ins[5].value)||0;
+    items.push({name:ins[0].value,spec:ins[1].value,qty:q,unit:ins[4].value,
+                price:p,amount:Math.round(q*p),note:ins[7].value});
+  });
+  return {
+    client:document.getElementById("fc").value,
+    phone:document.getElementById("fp").value,
+    fax:document.getElementById("ff").value,
+    site:document.getElementById("fs").value,
+    date:document.getElementById("fd").value,
+    vendor:document.getElementById("fv").value,
+    vendor_phone:document.getElementById("fvp").value,
+    items
+  };
+}
+
+// ── 預覽 ──────────────────────────────────────────────────────────────
+document.getElementById("pvBtn").onclick = () => {
+  const d = collect();
+  const roc = rocDate(d.date);
+  const sub = d.items.reduce((s,i)=>s+(i.amount||0),0);
+  const tax = Math.round(sub*.05);
+  const tot = Math.round(sub+tax);
+  let rows = "";
+  for(let i=0;i<16;i++){
+    const it = d.items[i];
+    rows += `<tr><td>${i+1}</td><td class="l">${it?E(it.name):""}</td><td>${it?E(it.spec):""}</td><td>${it&&it.qty?F(it.qty):""}</td><td>${it?E(it.unit):""}</td><td class="r">${it&&it.price?F(it.price):""}</td><td class="r">${it&&it.amount?F(it.amount):""}</td><td class="l">${it?E(it.note):""}</td></tr>`;
+  }
+  document.getElementById("pvBox").innerHTML = `
+    <div class="pq">
+      <div class="pq-t">報　價　單</div>
+      <div class="pq-c">登發室內裝璜工程有限公司</div>
+      <div class="pq-a">台中市大雅區清陽一路50巷19號</div>
+      <div class="pq-p">TEL：04-25651230　　FAX：04-25651231</div>
+      <div class="pq-i"><span>此致：${E(d.client)}</span><span>電話：${E(d.phone)}　傳真：${E(d.fax)}</span></div>
+      <div class="pq-i" style="border-top:none;padding-top:0"><span>${roc}</span><span>工地：${E(d.site)}</span></div>
+      <table class="pq-tb"><thead><tr><th></th><th>品名</th><th>規格</th><th>數量</th><th>單位</th><th>單價</th><th>金額</th><th>備註</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr><td></td><td colspan="5" style="text-align:right;font-weight:600">小　計</td><td class="r">${F(sub)}</td><td></td></tr>
+        <tr><td></td><td colspan="5" style="text-align:right;font-weight:600">5%營業稅</td><td class="r">${F(tax)}</td><td></td></tr>
+        <tr><td></td><td colspan="5" style="text-align:right;font-weight:700">合　計</td><td class="r" style="font-weight:700">${F(tot)}</td><td></td></tr>
+      </tfoot></table>
+      <div class="pq-s"><span>報價人：${E(d.vendor)}</span><span>電話：${E(d.vendor_phone)}</span></div>
+    </div>`;
+  const sec = document.getElementById("pvSec");
+  sec.style.display = "block";
+  sec.scrollIntoView({behavior:"smooth"});
+};
+
+// ── 匯出 ──────────────────────────────────────────────────────────────
+document.getElementById("xlBtn").onclick = () => exp("xlsx");
+document.getElementById("pdfBtn").onclick = () => exp("pdf");
+
+async function exp(type) {
+  const d = collect();
+  ss("s2","ld",`正在產生 ${type.toUpperCase()} ...`);
+  try {
+    const r = await fetch(`${API}/export/${type}`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(d)
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error||"失敗"); }
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `報價單_${(d.client||"客戶").slice(0,10)}_${d.date||"nodate"}.${type}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    ss("s2","ok",`✅ ${type.toUpperCase()} 已下載`);
+  } catch(e) { ss("s2","er","❌ "+e.message); }
+}
+
+// ── 工具 ──────────────────────────────────────────────────────────────
+function ss(id,t,m){const e=document.getElementById(id);e.className="st"+(t?" "+t+" show":"");e.innerHTML=t==="ld"?`<div class="sp"></div><span>${m}</span>`:m;}
+function F(n){n=parseFloat(n)||0;return n?Math.round(n).toLocaleString("zh-TW"):"";}
+function E(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function rocDate(s){try{const d=new Date(s||new Date());return`報價日期：${d.getFullYear()-1911}年${String(d.getMonth()+1).padStart(2,"0")}月${String(d.getDate()).padStart(2,"0")}日`;}catch{return"報價日期：";}}
+</script>
+</body>
+</html>
